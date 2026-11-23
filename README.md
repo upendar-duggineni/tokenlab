@@ -1,108 +1,130 @@
-# TokenLab — Multi-Provider Token Counter
+# TokenLab – Multi-LLM Token Counter
 
-TokenLab lets a user paste a prompt, select an LLM provider and model, and view the prompt's token count.
+A web-based token counting tool that helps you estimate or calculate token usage across multiple AI providers using their respective models.
 
-## Providers
+## 🚀 Live Demo
 
-- **Anthropic Claude:** Uses Anthropic's official `POST /v1/messages/count_tokens` API.
-- **Google Gemini:** Uses Google's `models/{model}:countTokens` API.
-- **OpenAI:** Uses `js-tiktoken` locally with the model's tokenizer encoding. OpenAI does not expose a standalone official token-count endpoint. This is a text-only tokenizer count, not an exact API billing count for a full chat request.
+**Try TokenLab here:**  
+https://tokenlab.onrender.com/
 
-API keys are entered in the UI, sent only in request headers for providers that require them, and are not stored in a database, local storage, or server logs. OpenAI's local tokenizer does not need an API key; the optional OpenAI key field is not sent or used.
+## ✨ Features
 
-## Folder structure
+- **Multi-provider support** – Supports OpenAI, Anthropic Claude, and Google Gemini.
+- **Dynamic model selection** – Fetches available models from provider APIs using your API key.
+- **Token counting**
+  - Anthropic Claude – Official token counting API.
+  - Google Gemini – Token counting API.
+  - OpenAI – Local token counting using `js-tiktoken`.
+- **API key based access** – Users supply their own API keys.
+- **Simple interface** – Enter text, choose a provider and model, and view token results.
+- **Responsive frontend** – Built with React and Vite.
+- **Backend API** – Node.js and Express.
 
-```text
-tokenlab/
-├── client/                 # React + Vite frontend
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── PromptInput.jsx
-│   │   │   ├── ModelSelector.jsx
-│   │   │   └── TokenResults.jsx
-│   │   │ ├── App.jsx
-│   │   │ ├── main.jsx
-│   │   │ └── styles.css
-│   │   ├── index.html
-│   │   └── package.json
-├── server/                 # Express backend
-│   ├── controllers/tokenController.js
-│   ├── routes/tokenRoutes.js
-│   └── server.js
-├── package.json
-├── render.yaml
-├── .env.example
-└── .gitignore
+## 🛠️ Tech Stack
+
+| Technology | Purpose |
+|---|---|
+| React | Frontend UI |
+| Vite | Frontend development and build |
+| Node.js | Backend runtime |
+| Express.js | Backend API |
+| js-tiktoken | OpenAI token estimation |
+| Anthropic API | Claude token counting |
+| Gemini API | Gemini token counting |
+| Render | Cloud deployment |
+
+## 🧠 Supported Providers
+
+### OpenAI
+- Dynamic model listing through the OpenAI API.
+- Local token counting with `js-tiktoken`.
+- Token counts are estimates and may not exactly match all API processing or billing token counts.
+
+### Anthropic Claude
+- Dynamic model listing.
+- Uses Anthropic's token counting API.
+
+### Google Gemini
+- Dynamic model listing.
+- Uses Google's token counting endpoint.
+
+## 📦 Run Locally
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/upendar-duggineni/tokenlab.git
+cd tokenlab
 ```
 
-## Prerequisites
-
-- Node.js 20+ (recommended)
-- npm
-- API key for Anthropic or Google Gemini if using those providers
-
-## Install locally
-
-From the root `tokenlab` folder:
+### 2. Install backend dependencies
 
 ```bash
 npm install
+```
+
+### 3. Install frontend dependencies
+
+```bash
 npm --prefix client install
 ```
 
-## Run in development
+### 4. Configure environment variables
+
+Create a `.env` file based on `.env.example` if required by the backend.
+
+Do not commit API keys or your `.env` file.
+
+### 5. Start the application
 
 ```bash
 npm run dev
 ```
 
-- React/Vite: http://localhost:5173
-- Express API: http://localhost:3001
-- Health check: http://localhost:3001/api/health
+## 🌐 Deployment
 
-Vite forwards `/api` requests to the Express backend during local development.
+TokenLab is deployed using **Render**.
 
-## Build and run production locally
+**Live application:** https://tokenlab.onrender.com/
 
-```bash
-npm run build
-npm start
+The deployment uses the `render.yaml` configuration file for build, start, and health-check settings.
+
+## 🔐 Security
+
+- API keys are supplied by users.
+- API keys should not be committed to GitHub.
+- Environment secrets should be kept out of source control.
+- Never expose private API keys in logs or frontend source code.
+
+## 📂 Project Structure
+
+```text
+tokenlab/
+├── client/
+│   └── src/
+│       ├── components/
+│       │   ├── ModelSelector.jsx
+│       │   ├── PromptInput.jsx
+│       │   └── TokenResults.jsx
+│       ├── App.jsx
+│       └── styles.css
+├── server/
+│   ├── controllers/
+│   │   └── tokenController.js
+│   ├── routes/
+│   │   └── tokenRoutes.js
+│   └── server.js
+├── package.json
+├── render.yaml
+└── README.md
 ```
 
-Then open http://localhost:3001.
+## 👨‍💻 Author
 
-## User workflow
+**Upendar Duggineni**
 
-1. Pick a provider from the Provider dropdown.
-2. Enter that provider's API key (Anthropic and Gemini require it; OpenAI local counting does not).
-3. Paste or type a prompt.
-4. Select a model from the model dropdown.
-5. Click **Count tokens**.
-6. Review the visible token count and its counting source.
+GitHub: https://github.com/upendar-duggineni
 
-## Deployment to Render
+---
 
-This repository includes `render.yaml` for a single Render Web Service.
-
-1. Push this folder to a GitHub repository.
-2. In Render, select **New → Blueprint** and connect the repository.
-3. Render reads `render.yaml`, installs dependencies, builds the client, and starts Express.
-4. Open the Render service URL after deployment completes.
-
-The production Express server serves the compiled React app from `client/dist` and API routes from `/api`.
-
-## API key security
-
-- Keys are not hardcoded.
-- Keys are not saved to local storage or a database.
-- Keys are sent as request headers only for the current count request.
-- Request payloads and headers containing keys are not logged.
-- Use only a deployment you trust; a public server operator could change the server code to collect keys.
-- OpenAI tokenizer mode runs locally on the server and does not call OpenAI's API.
-
-## Notes and limitations
-
-- Provider model identifiers can change or be retired; update model IDs in `client/src/App.jsx` and the allowlist/labels in `server/controllers/tokenController.js` when providers change their catalogs.
-- Token counts for provider APIs may include provider-specific text formatting overhead.
-- OpenAI tokenizer counts are text-only, tokenizer-based counts and do not account for all chat-message/API overhead.
-- This app counts input tokens only. It does not generate model responses.
+*TokenLab – Simplifying token analysis across AI models.*
